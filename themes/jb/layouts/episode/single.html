@@ -41,36 +41,36 @@
 
         <div class="columns" style="padding-top: 2em">
           <!-- Host Section -->
-          <div class="column is-8">
+          <div class="column is-4 has-text-centered-mobile">
             <h2>Hosts</h2>
             <section class="section host-list">
               <div class="container">
-                 <div class="columns is-multiline">
+                <div class="columns is-multiline is-narrow ">
                   {{ range $index, $hostname := .Params.hosts }}
                     {{ $host := index $.Site.Data.people $hostname }}
-                      <div class="column is-6 is-4-fullhd is-4-desktop is-12-mobile"  style="display: flex;">
-                        {{ partial "hosts/small-nobio.html" (dict "context" . "host" $host) }}
+                      <div class="column is-narrow">
+                        {{ partial "hosts/smallest.html" (dict "context" . "host" $host) }}
                       </div>
                   {{ end }}
                 </div>
               </div>
             </section>
+          </div>
+          <div class="column is-4 has-text-centered-mobile">
               {{ with .Params.guests }}
                 <h2>Guests</h2>
-                <section class="section sponsor-list">
                   <div class="container">
-                    <div class="columns is-multiline">
+                    <div class="columns is-multiline is-narrow">
                       {{ range $index, $guestname := . }}
                           {{ $guest := index $.Site.Data.people $guestname }}
-                          <div class="column is-6 is-4-fullhd is-4-desktop is-12-mobile"  style="display: flex;">
+                          <div class="column is-narrow">
                             {{ if $guest }}
-                              {{ partial "guests/small-nobio.html" (dict "context" . "guest" $guest) }}
+                              {{ partial "guests/smallest.html" (dict "context" . "guest" $guest) }}
                             {{ end }}
                           </div>
                       {{end}}
                     </div>
                   </div>
-                </section>
               {{ end }}
           </div>
 
