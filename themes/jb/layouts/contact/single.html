@@ -3,12 +3,83 @@
 {{end}}
 
 {{ define "main" }}
-  <div class="container">
+  <!-- <div class="container">
     <div class="content">
       <h1>{{.Title}}</h1>
       <iframe id="contact-frame" height="1000" allowTransparency="true" frameborder="0" scrolling="no" style="width:100%;border:none"  src="https://jblive.wufoo.com/embed/w7x2r7/">
         <a target="_blank" href="https://jblive.wufoo.com/forms/w7x2r7/">Fill out the form here</a>
       </iframe>
+    </div>
+  </div> -->
+
+  <div class="container">
+    <div class="content">
+      <h1>{{ .Title }}</h1>
+      <form method="POST" action="https://jblive.wufoo.com/api/v3/forms/w7x2r7/entries.json">
+        <div class="columns">
+          <div class="column is-4">
+            <label class="label" for="Field4">First Name:</label>
+            <input class="input" type="text" id="Field4">
+          </div>
+          <div class="column is-4">
+            <label class="label" for="Field5">Last Name:</label>
+            <input class="input" type="text" id="Field5">
+          </div>
+        </div>
+
+        <div class="columns">
+          <div class="column">
+            <label class="label" for="Field7">Show:</label>
+            <select class="select" type="text" id="Field7">
+              <option value="General Comments" selected>General Comments</option>
+              <option value="Coder Radio">Coder Radio</option>
+              <option value="Linux Unplugged">Linux Unplugged</option>
+              <option value="Linux Action News">Linux Action News</option>
+              <option value="Self Hosted">Self Hosted</option>
+              <option value="Office Hours">Office Hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="columns">
+          <div class="column is-4">
+            <label class="label" for="Field6">Email:</label>
+            <input class="input" type="email" id="Field6">
+          </div>
+          <div class="column is-4">
+            <label class="label" for="Field14">Subject:</label>
+            <input class="input" type="text" id="Field14">
+          </div>
+        </div>
+
+        <div class="columns">
+          <div class="column is-8">
+            <label class="label" for="Field1">Message:</label>
+            <textarea class="textarea" id="Field1"></textarea>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <label class="label" for="Field11">Attachments</label>
+            <input type="file">
+          </div>
+        </div>
+
+        <div class="columns">
+          <div class="column is-12">
+            <input class="radio" type="radio" id="feedback-public" name="Field9" value="I grant permission to read or post this feedback on-air and/or on the website.">
+            <label for="feedback-public">My feedback can be used on the show</label><br>
+            <input class="radio" type="radio" id="feedback-private" name="Field9" value="This feedback is private.">
+            <label for="feedback-private">My feedback is private</label><br>  
+          </div>
+        </div>
+        
+        <div class="columns">
+          <div class="column mb-4">
+            <button class="button is-primary" type="submit">Submit</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 {{end}}
