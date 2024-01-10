@@ -1,5 +1,11 @@
 {{ define "headcontent" }}
-
+  {{ $contact := resources.Get "js/contact.js" }}
+  {{ if hugo.IsProduction }}
+    {{ $contact = $contact | minify | fingerprint }}
+  {{ end }}
+  <script type="text/javascript" src="{{ $contact.Permalink }}" integrity="{{ $contact.Data.Integrity }}"></script>
+  <!-- Script to submit form to Wufoo -->
+  <script type="text/javascript" src = "https://static.wufoo.com/scripts/public/dynamic.0690.js?language=english"></script> 
 {{end}}
 
 {{ define "main" }}
@@ -15,7 +21,7 @@
   <div class="container">
     <div class="content">
       <h1>{{ .Title }}</h1>
-      <form method="POST" action="https://jblive.wufoo.com/api/v3/forms/w7x2r7/entries.json">
+      <form>
         <div class="columns">
           <div class="column is-4 is-offset-2">
             <label class="label" for="Field4">First Name:</label>
@@ -42,11 +48,14 @@
         </div>
 
         <div class="columns">
-          <div class="column is-4 is-offset-2">
+          <div class="column is-8 is-offset-2">
             <label class="label" for="Field6">Email:</label>
             <input class="input" type="email" id="Field6">
           </div>
-          <div class="column is-4">
+        </div>
+        
+        <div class="columns">
+          <div class="column is-8 is-offset-2">
             <label class="label" for="Field14">Subject:</label>
             <input class="input" type="text" id="Field14">
           </div>
