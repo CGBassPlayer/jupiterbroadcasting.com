@@ -1,0 +1,54 @@
+name: Add a Pick
+
+on: 
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+    labels: 
+      - "pick"
+
+jobs:
+  generate-pick-file:
+    name: Generate Pick File
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse Issue Data
+        id: parse_issue
+        uses: issueops/parser@v5
+        with:
+          issue-form-template: pick.yml
+          body: ${{ github.event.issue.body }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Generate Pick File
+        run: |
+          cat << EOF > data/picks/{{ steps.parse_issue.outputs.parsed_title }}.yaml
+          ---
+          description: ${{ steps.parse_issue.outputs.parsed_description }}
+          license: ${{ steps.parse_issue.outputs.parsed_license }}
+          shows:
+            - episode: ${{ steps.parse_issue.outputs.parsed_episode }}
+              show: ${{ steps.parse_issue.outputs.parsed_shows }}
+              slug: ${{ steps.parse_issue.outputs.parsed_shows | lower | replace(' ', '-') }}
+          title: ${{ steps.parse_issue.outputs.parsed_title }}
+          url: ${{ steps.parse_issue.outputs.parsed_url }}
+          EOF
+
+      - name: Commit and Push Pick File
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'Add pick: ${{ steps.parse_issue.outputs.parsed_title }}'
+          branch: pick-{{ github.event.issue.number }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: pick-{{ github.event.issue.number }}
+          title: 'Add pick: ${{ steps.parse_issue.outputs.parsed_title }}'
+          body: |
+            Adds the pick: ${{ steps.parse_issue.outputs.parsed_title }}
+          labels: pick

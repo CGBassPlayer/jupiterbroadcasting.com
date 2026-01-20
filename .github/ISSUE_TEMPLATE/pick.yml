@@ -1,55 +1,57 @@
 name: Adding a Pick
-description: For adding a pick from the back catalog to the Pick Pen
+description: Add a pick from the back catalog to the Pick Pen (Before LUP 600). This is for adding picks that the show has chosen. Please do not add your personal picks.
 labels:
   - "pick"
 body:
-  - type: input
-    id: title
+  - id: title
+    type: input
     attributes:
       label: Name
-      description: What is the name of the pick?
+      description: This should match the title in the episode's show notes.
       placeholder: Pick Name
     validations:
       required: true
-  - type: input
-    id: url
+  - id: url
+    type: input
     attributes:
-      label: URL
-      description: What is the URL of the pick? This will probably match the link in the show notes.
+      label: Pick URL
+      description: This should match the link in the episode's show notes.
     validations:
       required: true
-  - type: input
-    id: description
+  - id: description
+    type: textarea
     attributes:
       label: Description
-      description: Describe the pick in a single sentence. This will probably match the description in the show notes.
+      description: This should match the description in the episode's show notes.
     validations:
-      required: true
-  - type: input
-    id: license
+      required: true 
+  - id: license
+    type: input
     attributes:
       label: License
       description: What is the license of the pick?
-  - type: dropdown
-    id: shows
+      placeholder: AGPL-3.0
+  - id: shows
+    type: dropdown
     attributes:
       label: Show
       multiple: true
       default: 0
       options:
         - LINUX Unplugged
-        - Self-Hosted
-        - Coder Radio
         - This Week in Bitcoin
         - The Launch
-      description: Which show(s) is this pick from?
+        - Jupiter Extras
+        - Coder Radio
+        - Linux Action News
+        - Office Hours
+        - Self-Hosted
     validations:
       required: true
-  - type: input
-    id: episode
+  - id: episode
+    type: input
     attributes:
-      label: Episode
-      description: What is the episode this pick is from?
+      label: Episode Number
+      placeholder: '600'
     validations:
       required: true
-  
