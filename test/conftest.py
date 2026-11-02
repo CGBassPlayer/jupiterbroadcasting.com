@@ -1,9 +1,8 @@
 
 from pathlib import Path
-from typing import Dict, Generator, List, Tuple, Callable
+from typing import Dict, Generator, List, Optional, Tuple, Callable
 from pytest import fixture
 from _pytest.fixtures import SubRequest
-from pytest_base_url.plugin import base_url
 from playwright.sync_api import Playwright, APIRequestContext, Route, Page, Browser
 import json
 
@@ -44,9 +43,9 @@ def mobile_device_tuple(
     browser: Browser,
     # Playwright object given by playwright built-in fixture
     playwright: Playwright,
-    # from the pytest-base-url plugin Playwright installs (automatically)
+    # from pytest-playwright's --base-url option
     #   so we're not having to hard-code the URL
-    base_url: base_url,
+    base_url: Optional[str],
 ) -> Tuple[Page,str]:
 
     # based on here: https://playwright.dev/python/docs/emulation#devices
@@ -72,9 +71,9 @@ def mobile_device_tuple(
 def api_request_context(
     # base playwright context/object
     playwright: Playwright,
-    # from the pytest-base-url plugin Playwright installs (automatically)
+    # from pytest-playwright's --base-url option
     #   so we're not having to hard-code the URL
-    base_url: base_url,
+    base_url: Optional[str],
     # Generator is returned based on Playwright docs
 ) -> Generator[APIRequestContext, None, None]:
     # creates APIRequestContext to allow requests to be made
