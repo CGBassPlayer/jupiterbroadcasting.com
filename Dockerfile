@@ -12,7 +12,7 @@ RUN set -x && ( [ -z "${BASE_URL}" ] || [ "${BASE_URL}" == "PROD" ] ) \
     && hugo --gc \
     || ( [ "${BASE_URL}" == 'TESTS_WEB' ] && hugo --gc --baseURL "/" || exit 1 )
 
-FROM nginx:1.31.8-alpine
+FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 RUN sed -i 's/#error_page/error_page/' /etc/nginx/conf.d/default.conf
 COPY --from=builder /site/public /usr/share/nginx/html
