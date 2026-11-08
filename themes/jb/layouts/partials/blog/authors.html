@@ -1,0 +1,10 @@
+{{- /* Authors with a people page are linked; anything else in `authors` renders as plain text. */ -}}
+{{- $people := where site.RegularPages "Section" "people" -}}
+{{- range $i, $author := .Params.authors -}}
+  {{- if $i }}, {{ end -}}
+  {{- range first 1 (where $people "Params.username" $author) -}}
+    <a href="/{{ .Type | pluralize }}/{{ .Params.username }}/">{{ .Title }}</a>
+  {{- else -}}
+    {{ $author }}
+  {{- end -}}
+{{- end -}}
