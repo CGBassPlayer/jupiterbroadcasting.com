@@ -1,0 +1,68 @@
+{{ define "main" }}
+{{ $show := "" }}
+{{ $list := .Parent }}
+{{ $siblings := .Parent.RegularPages }}
+{{ with .Params.show }}
+  {{ $show = site.GetPage (printf "/show/%s" .) }}
+  {{ with site.GetPage (printf "/show/%s/articles" .) }}{{ $list = . }}{{ end }}
+  {{ $siblings = where $siblings "Params.show" . }}
+{{ end }}
+{{ $older := first 1 (where $siblings.ByDate.Reverse "Date" "lt" .Date) }}
+{{ $newer := first 1 (where $siblings.ByDate "Date" "gt" .Date) }}
+
+<div class="container p-4">
+  <nav class="breadcrumb" aria-label="breadcrumbs">
+    <ul>
+      {{ if $show }}
+        <li><a href="{{ $show.Parent.Permalink }}">Shows</a></li>
+        <li><a href="{{ $show.Permalink }}">{{ $show.Title }}</a></li>
+        <li><a href="{{ $list.Permalink }}">Articles</a></li>
+      {{ else }}
+        <li><a href="{{ $list.Permalink }}">{{ $list.Title }}</a></li>
+      {{ end }}
+      <li class="is-active"><a href="{{ .Permalink }}" aria-current="page">{{ .Title }}</a></li>
+    </ul>
+  </nav>
+
+  <div class="columns is-centered">
+    <article class="column is-10-tablet is-8-desktop article">
+      <div class="content mb-4">
+        <h1 class="mb-2">{{ .Title }}</h1>
+        <h6 style="font-style: italic">
+          <time datetime="{{ .Date.Format "2006-01-02T15:04:05-07:00" }}">{{ .Date.Day }} {{ .Date.Month }} {{ .Date.Year }}</time>
+          {{ with .Params.authors }} &middot; by {{ partial "blog/authors.html" $ }}{{ end }}
+        </h6>
+        {{ with .Params.tags }}<div class="tags">{{ partial "episode/tags.html" . }}</div>{{ end }}
+      </div>
+
+      {{ with .Params.header_image }}
+        <figure class="image mb-5">
+          <img src="{{ . }}" alt="{{ $.Title }}">
+        </figure>
+      {{ end }}
+
+      <div class="content article-body">
+        {{ .Content }}
+      </div>
+
+      {{ with .Params.original_url }}
+        <p class="is-size-7 mt-5">Originally published at <a href="{{ . }}" target="_blank" rel="noopener">{{ . }}</a></p>
+      {{ end }}
+
+      <nav class="level mt-6 article-pager" aria-label="article navigation">
+        <div class="level-left">
+          {{ range $older }}<a class="level-item" href="{{ .Permalink }}" rel="prev">&larr; {{ .Title }}</a>{{ end }}
+        </div>
+        <div class="level-right">
+          {{ range $newer }}<a class="level-item" href="{{ .Permalink }}" rel="next">{{ .Title }} &rarr;</a>{{ end }}
+        </div>
+      </nav>
+
+      <div class="buttons mt-4">
+        <a class="button is-dark" href="{{ $list.Permalink }}">&larr; {{ if $show }}{{ $show.Title }} Articles{{ else }}{{ $list.Title }}{{ end }}</a>
+        {{ with $show }}<a class="button is-dark" href="{{ .Permalink }}">{{ .Title }}</a>{{ end }}
+      </div>
+    </article>
+  </div>
+</div>
+{{ end }}

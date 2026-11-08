@@ -95,6 +95,10 @@
                                     {{ if ne .Params.comms_type "network" }} {{ .Params.comms_type }} {{ end }}{{ .Title }}
                                 </a>
                               {{ end }}
+                              {{ with site.GetPage "/blog" }}
+                                  <hr class="navbar-divider">
+                                  <a href="{{ .RelPermalink }}" class="navbar-item">{{ .Title }}</a>
+                              {{ end }}
                           </div>
                       </div>
                       {{ else if eq .Identifier "home"}}

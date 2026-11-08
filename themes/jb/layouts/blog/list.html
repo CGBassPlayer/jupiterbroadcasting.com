@@ -1,0 +1,21 @@
+{{ define "main" }}
+<div class="container p-4">
+  <h1 class="title">{{ .Title }}</h1>
+  {{ with .Content }}<div class="content">{{ . }}</div>{{ end }}
+</div>
+
+<section class="section episode-list article-list">
+  <div class="container p-4">
+    <div class="columns is-multiline">
+      {{ range (.Paginate .Pages).Pages }}
+        <div class="column is-6 is-4-fullhd is-4-desktop is-12-mobile" style="display: flex;">
+          {{ partial "blog/preview.html" (dict "page" . "badge" true) }}
+        </div>
+      {{ end }}
+    </div>
+  </div>
+  <div class="container p-4">
+    {{ partial "helper/pagination.html" . }}
+  </div>
+</section>
+{{ end }}

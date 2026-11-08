@@ -1,0 +1,36 @@
+{{ define "main" }}
+{{ $show := .Parent }}
+{{ $articles := where (where site.RegularPages "Section" "blog") "Params.show" $show.Params.show }}
+<div class="container p-4">
+  <nav class="breadcrumb" aria-label="breadcrumbs">
+    <ul>
+      <li><a href="{{ $show.Parent.Permalink }}">Shows</a></li>
+      <li><a href="{{ $show.Permalink }}">{{ $show.Title }}</a></li>
+      <li class="is-active"><a href="{{ .Permalink }}" aria-current="page">Articles</a></li>
+    </ul>
+  </nav>
+  <h1 class="title">{{ .Title }}</h1>
+  {{ with $articles }}
+    <p class="subtitle">{{ len . }} articles since {{ (index .ByDate 0).Date.Format "January 2006" }}</p>
+  {{ end }}
+  <div class="buttons">
+    <a class="button is-dark" href="{{ $show.Permalink }}">&larr; {{ $show.Title }}</a>
+    {{ with site.GetPage "/blog" }}<a class="button is-dark" href="{{ .Permalink }}">All JB Blog posts</a>{{ end }}
+  </div>
+</div>
+
+<section class="section episode-list article-list">
+  <div class="container p-4">
+    <div class="columns is-multiline">
+      {{ range (.Paginate $articles).Pages }}
+        <div class="column is-6 is-4-fullhd is-4-desktop is-12-mobile" style="display: flex;">
+          {{ partial "blog/preview.html" (dict "page" . "badge" false) }}
+        </div>
+      {{ end }}
+    </div>
+  </div>
+  <div class="container p-4">
+    {{ partial "helper/pagination.html" . }}
+  </div>
+</section>
+{{ end }}

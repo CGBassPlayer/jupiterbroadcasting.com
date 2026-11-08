@@ -30,7 +30,7 @@ podverse_podcast_id = "g40Um-HP1"
 [links.mumble]
   url="https://linuxunplugged.com/mumble"
 [links.blog]
-  url="https://linuxunplugged.com/articles"
+  url="/show/linux-unplugged/articles/"
 [links.youtube]
   url="https://www.youtube.com/playlist?list=PLUW3LUwQvegxVckkyK5dyyARdfjwGY-cw"
 [links.smart-link]

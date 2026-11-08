@@ -1,0 +1,22 @@
+{{- $show := "" -}}
+{{- with .page.Params.show }}{{ $show = site.GetPage (printf "/show/%s" .) }}{{ end -}}
+{{- $image := .page.Params.header_image | default (cond (ne $show "") $show.Params.header_image "/images/logo.png") -}}
+<div class="card card-episode card-article">
+  <a href="{{ .page.Permalink }}">
+    <div class="card-image">
+      <figure class="image is-16by9">
+        <img src="{{ $image }}" width="432" height="242" alt="{{ .page.Title }}" loading="lazy">
+      </figure>
+    </div>
+    <div class="card-content">
+      <div class="content">
+        {{ if .badge }}
+          <span class="tag is-primary mb-2">{{ if $show }}{{ $show.Title }}{{ else }}Jupiter Broadcasting{{ end }}</span>
+        {{ end }}
+        <h3>{{ .page.Title }}</h3>
+        <strong>{{ .page.Date.Day }} {{ .page.Date.Month }} {{ .page.Date.Year }}</strong><br />
+        <p style="color:white">{{ .page.Description }}</p>
+      </div>
+    </div>
+  </a>
+</div>

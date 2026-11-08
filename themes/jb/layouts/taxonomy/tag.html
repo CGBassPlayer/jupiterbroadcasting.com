@@ -8,7 +8,11 @@
      <div class="columns is-multiline">
         {{ range .Pages }}
               <div class="column is-6 is-4-fullhd is-4-desktop is-12-mobile"  style="display: flex;">
-                  {{ partial "episode/preview.html" . }}
+                  {{ if eq .Section "blog" }}
+                    {{ partial "blog/preview.html" (dict "page" . "badge" true) }}
+                  {{ else }}
+                    {{ partial "episode/preview.html" . }}
+                  {{ end }}
               </div>
         {{ end }}
       </div>
