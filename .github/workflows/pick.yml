@@ -1,54 +1,68 @@
 name: Add a Pick
 
-on: 
+on:
   issues:
     types:
       - opened
       - edited
       - reopened
-    labels: 
-      - "pick"
+
+env:
+  BASE_BRANCH: main
 
 jobs:
   generate-pick-file:
     name: Generate Pick File
+    # the "Adding a Pick" issue form applies the pick label
+    if: contains(github.event.issue.labels.*.name, 'pick')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
-      - name: Parse Issue Data
-        id: parse_issue
-        uses: issueops/parser@v5
+      - name: Checkout base branch
+        uses: actions/checkout@v7
         with:
-          issue-form-template: pick.yml
-          body: ${{ github.event.issue.body }}
+          ref: ${{ env.BASE_BRANCH }}
 
-      - name: Checkout Repository
-        uses: actions/checkout@v6
-
-      - name: Generate Pick File
-        run: |
-          cat << EOF > data/picks/{{ steps.parse_issue.outputs.parsed_title }}.yaml
-          ---
-          description: ${{ steps.parse_issue.outputs.parsed_description }}
-          license: ${{ steps.parse_issue.outputs.parsed_license }}
-          shows:
-            - episode: ${{ steps.parse_issue.outputs.parsed_episode }}
-              show: ${{ steps.parse_issue.outputs.parsed_shows }}
-              slug: ${{ steps.parse_issue.outputs.parsed_shows | lower | replace(' ', '-') }}
-          title: ${{ steps.parse_issue.outputs.parsed_title }}
-          url: ${{ steps.parse_issue.outputs.parsed_url }}
-          EOF
-
-      - name: Commit and Push Pick File
-        uses: stefanzweifel/git-auto-commit-action@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
         with:
-          commit_message: 'Add pick: ${{ steps.parse_issue.outputs.parsed_title }}'
-          branch: pick-{{ github.event.issue.number }}
+          python-version: '3.12'
 
-      - name: Create Pull Request
+      - name: Install PyYAML
+        # keep in sync with test/Pipfile
+        run: pip install pyyaml==6.0.3
+
+      - name: Generate pick file
+        id: pick
+        # the issue body is untrusted, so it only ever goes through env vars, never into the script text
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: python3 scripts/generate_pick.py
+
+      - name: Open pull request
         uses: peter-evans/create-pull-request@v8
         with:
-          branch: pick-{{ github.event.issue.number }}
-          title: 'Add pick: ${{ steps.parse_issue.outputs.parsed_title }}'
+          base: ${{ env.BASE_BRANCH }}
+          branch: ${{ steps.pick.outputs.branch }}
+          add-paths: ${{ steps.pick.outputs.file }}
+          commit-message: 'Add pick: ${{ steps.pick.outputs.title }}'
+          title: 'Add pick: ${{ steps.pick.outputs.title }}'
           body: |
-            Adds the pick: ${{ steps.parse_issue.outputs.parsed_title }}
+            Adds the pick from #${{ github.event.issue.number }} to the Pick Pen.
+
+            Generated from the issue form, so check the details against the episode's show notes before merging.
           labels: pick
+
+      - name: Comment on the issue if generation failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --body "Couldn't generate the pick file from this issue. Check the fields against the form (Pick URL must be a full http(s) link, Episode Number a whole number) and edit the issue to retry. Details: $RUN_URL"

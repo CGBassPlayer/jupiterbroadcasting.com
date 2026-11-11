@@ -12,6 +12,8 @@ playwright = "==1.64.1"
 pytest-metadata = "==3.1.1"
 # allows parallelism to happen: https://playwright.dev/python/docs/test-runners#parallelism-running-multiple-tests-at-once
 pytest-xdist = "==3.8.0"
+# the pick-from-issue script (scripts/generate_pick.py) and its unit tests
+pyyaml = "==6.0.3"
 
 [dev-packages]
 # code formatter

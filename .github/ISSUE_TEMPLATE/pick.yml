@@ -24,7 +24,7 @@ body:
       label: Description
       description: This should match the description in the episode's show notes.
     validations:
-      required: true 
+      required: true
   - id: license
     type: input
     attributes:
