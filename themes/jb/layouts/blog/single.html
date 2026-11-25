@@ -35,11 +35,11 @@
         {{ with .Params.tags }}<div class="tags">{{ partial "episode/tags.html" . }}</div>{{ end }}
       </div>
 
-      {{ with .Params.header_image }}
+      {{ with .Params.header_image }}{{ if not (in (string $.Content) .) }}
         <figure class="image mb-5">
           <img src="{{ . }}" alt="{{ $.Title }}">
         </figure>
-      {{ end }}
+      {{ end }}{{ end }}
 
       <div class="content article-body">
         {{ .Content }}

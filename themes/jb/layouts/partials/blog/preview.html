@@ -11,7 +11,8 @@
     <div class="card-content">
       <div class="content">
         {{ if .badge }}
-          <span class="tag is-primary mb-2">{{ if $show }}{{ $show.Title }}{{ else }}Jupiter Broadcasting{{ end }}</span>
+          {{ $chips := dict "linux-unplugged" "is-lup-blue" "linux-action-news" "is-lan-red" "self-hosted" "is-ssh-orange" "jupiter-extras" "is-extras-grey" "coder-radio" "is-jb-green" "office-hours" "is-jb-pink" "the-launch" "is-jb-grey" "this-week-in-bitcoin" "is-jb-gold" }}
+          <span class="tag {{ index $chips (.page.Params.show | default "") | default "is-primary" }} mb-2">{{ if $show }}{{ $show.Title }}{{ else }}Jupiter Broadcasting{{ end }}</span>
         {{ end }}
         <h3>{{ .page.Title }}</h3>
         <strong>{{ .page.Date.Day }} {{ .page.Date.Month }} {{ .page.Date.Year }}</strong><br />
