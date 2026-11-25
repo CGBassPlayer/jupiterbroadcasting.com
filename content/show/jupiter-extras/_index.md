@@ -22,6 +22,8 @@ podverse_podcast_id = "0vaTwihG1R"
   url="https://extras.show/contact"
 [links.twitter]
   url="https://twitter.com/jupiterextras"
+[links.blog]
+  url="/show/jupiter-extras/articles/"
 [links.youtube]
   url="https://www.youtube.com/playlist?list=PLUW3LUwQvegzkMxcqW0dslRJmumg6WrZi"
 [links.smart-link]
