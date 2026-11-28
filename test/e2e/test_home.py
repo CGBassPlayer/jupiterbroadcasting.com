@@ -1,27 +1,37 @@
 import re
-from pathlib import Path
-from typing import Dict, List
-from urllib.parse import urlparse
-from pytest import fixture, mark
-from playwright.sync_api import Page, expect, Locator
+from datetime import datetime, timezone
 
-# allows this to be run for every test in this file,
-#   without it needing to specify it
+from pytest import fixture
+from playwright.sync_api import Page, expect
+
+from episode_data import CONTENT_SHOW, _published, episodes_by_date, is_active
+
+
 @fixture(autouse=True)
 def setup(page: Page):
+    """
+    Code here will run for every test in this file
+    """
     page.goto("/")
 
-def test_homepage_screenshot(page: Page, screenshot_dir: Path):
-    page.screenshot(path=f"{screenshot_dir}/home.png", full_page=True)
 
 def test_homepage_has_logo(page: Page):
+    """
+    Ensure the large logo and text underneath it is visible on the screen
+    """
     logo = page.locator(".logo")
     expect(logo).to_be_visible()
 
     logo_subtitle = page.locator('.subtitle')
-    expect(logo_subtitle).to_contain_text('Home to the best shows on Linux, Open Source, Security, Privacy, Community, Development, and News')
+    expect(logo_subtitle).to_contain_text(
+        'Home to the best shows on Linux, Open Source, Security, Privacy, Community, Development, and News'
+    )
 
-def test_pagination(page: Page):
+
+def test_home_pagination(page: Page):
+    """
+    Ensure the pagination loads different episodes
+    """
     first_card = page.locator('.card').nth(0).text_content
     page_2_button = page.locator('[aria-label="pagination"] >> text=2')
     page_2_button.click()
@@ -30,59 +40,114 @@ def test_pagination(page: Page):
     first_card_second_page = page.locator('.card').nth(0).text_content
     assert first_card != first_card_second_page
 
-def test_rss_feeds(page: Page, expected_rss_feeds: List[Dict[str,str]]):
-    for rss_feed in expected_rss_feeds:
-        element = page.locator('#rss-feeds-menu > div > a[href^="{}"]'.format(rss_feed['href']))
-        expect(element).to_contain_text(rss_feed['title'])
+
+def _expected_slides() -> list[str]:
+    """
+    One slide per active show, newest episode first (themes/jb/layouts/index.html).
+    Future-dated episodes aren't built, so they don't count toward "newest"
+    """
+    now = datetime.now(timezone.utc)
+    latest = {}
+    for show_dir in CONTENT_SHOW.iterdir():
+        if show_dir.is_dir() and is_active(show_dir):
+            dates = [_published(e.data["date"]) for e in episodes_by_date(show_dir)]
+            dates = [d for d in dates if d <= now]
+            if dates:
+                latest[show_dir.name] = max(dates)
+    return [f"/show/{slug}/" for slug in sorted(latest, key=latest.get, reverse=True)]
 
 
-def test_dropdowns(page: Page, expected_dropdown_items: Dict[str,List[Dict[str,str]]]):
-    for dropdown_text, child_elements in expected_dropdown_items.items():
-        
-        # dropdown item to hover over in menu
-        parent_element: Locator = page.locator(f'.navbar-start >> a:has-text("{dropdown_text}"):visible')
-
-        # hover to show elements
-        parent_element.hover()
-
-        # this is because Shows's url is show
-        singular = dropdown_text.lower().rstrip('s')
-        # test to make sure menu items hyperlink
-        expect(parent_element).to_have_attribute('href', f'/{singular}/')
-
-        # finds sibling element, which contains all the dropdown elements
-        dropdown_elements: Locator = page.locator(f'a:has-text("{dropdown_text}") + .navbar-dropdown')
-
-        for dropdown_item in child_elements:
-            item: Locator = dropdown_elements.locator(f'a.navbar-item:has-text("{dropdown_item["title"]}")')
-            try:
-                # check if the path matches exactly what's in our expected output
-                expect(item).to_have_attribute('href', dropdown_item['href'])
-            except AssertionError:
-                # if not, then it's a relative links (i.e. /community/irc/)
-                #   so just comparing the path of the item
-                assert urlparse(item.get_attribute('href')).path == dropdown_item['href']
-            expect(item).to_be_visible()
+def test_show_slider_slides(page: Page):
+    slider = page.locator(".show-slider")
+    expect(slider).to_have_class(re.compile(r"\bswiper-initialized\b"))
+    hrefs = slider.locator(".swiper-slide a").evaluate_all("els => els.map(e => new URL(e.href).pathname)")
+    assert hrefs == _expected_slides()
 
 
-
-def test_nav(page: Page, expected_dropdowns, expect_nav_items):
-
-    nav = page.locator('#mainnavigation')
-    expect(nav).to_be_visible()
-    dropdown_nav_items = page.locator('.navbar-start > * > a')
-    count = dropdown_nav_items.count()
-    for i in range(count):
-        expect(dropdown_nav_items.nth(i)).to_contain_text(expected_dropdowns[i]['title'])
-        expect(dropdown_nav_items.nth(i)).to_have_attribute('href', expected_dropdowns[i]['href'])
+def _slider_at_start(page: Page):
+    expect(page.locator(".show-slider .swiper-button-prev")).to_have_class(re.compile(r"\bswiper-button-disabled\b"))
+    expect(page.locator(".show-slider .swiper-button-next")).not_to_have_class(re.compile(r"\bswiper-button-disabled\b"))
 
 
-    nav_items = page.locator('.navbar-start > a')
-    count = nav_items.count()
-    for i in range(count):
-        expect(nav_items.nth(i)).to_contain_text(expect_nav_items[i]['title'])
-        expect(nav_items.nth(i)).to_have_attribute('href', expect_nav_items[i]['href'])
+def _slider_moved(page: Page):
+    # polls, so a slow transition under parallel load isn't read as "didn't move"
+    page.wait_for_function(
+        "() => new DOMMatrix(getComputedStyle(document.querySelector('.show-slider .swiper-wrapper')).transform).m41 < 0"
+    )
+    expect(page.locator(".show-slider .swiper-button-prev")).not_to_have_class(re.compile(r"\bswiper-button-disabled\b"))
 
-    nav_image = page.locator('.navbar-brand > a > img')
 
-    expect(nav_image.nth(0)).to_be_visible()
+def test_show_slider_buttons(page: Page):
+    _slider_at_start(page)
+    page.locator(".show-slider .swiper-button-next").click()
+    _slider_moved(page)
+    page.locator(".show-slider .swiper-button-prev").click()
+    _slider_at_start(page)
+
+
+def test_show_slider_drag(page: Page):
+    """
+    A mouse drag (Swiper's simulateTouch) moves the slider. The drag is held past Swiper's longSwipesMs (300ms):
+    a quick flick can't be timed reliably under parallel load (Firefox's synthetic mouse took 538ms), and a held
+    drag is what someone dragging with a mouse does anyway
+    """
+    _slider_at_start(page)
+    box = page.locator(".show-slider").bounding_box()
+    y = box["y"] + box["height"] / 2
+    page.mouse.move(box["x"] + box["width"] * 0.8, y)
+    page.mouse.down()
+    page.mouse.move(box["x"] + box["width"] * 0.5, y, steps=5)
+    page.wait_for_timeout(600)
+    page.mouse.move(box["x"] + box["width"] * 0.2, y, steps=5)
+    page.mouse.up()
+    expect(page.locator(".show-slider .swiper-button-prev")).not_to_have_class(re.compile(r"\bswiper-button-disabled\b"))
+
+
+def _slide_to_end(page: Page):
+    page.locator(".show-slider").evaluate("el => el.swiper.slideTo(el.swiper.slides.length - 1, 0)")
+    page.wait_for_function("() => document.querySelector('.show-slider').swiper.isEnd")
+
+
+def test_show_slider_next_wraps_to_start(page: Page):
+    """
+    Next at the last slide goes back to the first, and stays enabled at the end. Prev still stops at the start
+    """
+    _slide_to_end(page)
+    next_button = page.locator(".show-slider .swiper-button-next")
+    expect(next_button).not_to_have_class(re.compile(r"\bswiper-button-disabled\b"))
+
+    next_button.click()
+    _slider_at_start(page)
+
+
+def test_show_slider_drag_stops_at_end(page: Page):
+    """
+    Only the Next button wraps: a drag past the last slide stays on the last slide
+    """
+    _slide_to_end(page)
+    box = page.locator(".show-slider").bounding_box()
+    y = box["y"] + box["height"] / 2
+    page.mouse.move(box["x"] + box["width"] * 0.8, y)
+    page.mouse.down()
+    page.mouse.move(box["x"] + box["width"] * 0.5, y, steps=5)
+    page.wait_for_timeout(600)
+    page.mouse.move(box["x"] + box["width"] * 0.2, y, steps=5)
+    page.mouse.up()
+    page.wait_for_timeout(800)
+    assert page.locator(".show-slider").evaluate("el => el.swiper.isEnd")
+
+
+def test_terminal_clients_get_ansi_home(page: Page):
+    for agent in ("curl/8.5.0", "Wget/1.21.4", "HTTPie/3.2.2"):
+        response = page.request.get("/", headers={"User-Agent": agent})
+        assert response.ok
+        assert response.headers["content-type"].startswith("text/plain"), agent
+        body = response.text()
+        assert "B  R  O  A  D  C  A  S  T  I  N  G" in body
+        for show in (p for p in CONTENT_SHOW.iterdir() if p.is_dir() and is_active(p)):
+            assert f"/show/{show.name}/" in body, show.name
+
+
+def test_browsers_get_html_home(page: Page):
+    response = page.request.get("/", headers={"User-Agent": "Mozilla/5.0"})
+    assert response.headers["content-type"].startswith("text/html")

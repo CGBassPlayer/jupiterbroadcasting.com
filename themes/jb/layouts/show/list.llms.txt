@@ -1,0 +1,37 @@
+{{- $eps := where .Pages "Type" "episode" -}}
+{{- $sorted := $eps.ByDate.Reverse -}}
+{{- $lo := 0 }}{{ $hi := 0 }}{{ $nums := 0 }}{{ $specials := 0 -}}
+{{- range $eps }}{{ $e := .Params.episode -}}
+{{- if or (eq (printf "%T" $e) "int") (eq (printf "%T" $e) "float64") }}{{ $nums = add $nums 1 -}}
+{{- if eq $lo 0 }}{{ $lo = $e }}{{ $hi = $e }}{{ else }}{{ if lt $e $lo }}{{ $lo = $e }}{{ end }}{{ if gt $e $hi }}{{ $hi = $e }}{{ end }}{{ end -}}
+{{- else }}{{ $specials = add $specials 1 }}{{ end -}}
+{{- end -}}
+# {{ .Title }}
+
+> {{ .Description }}
+
+## The show
+
+- [{{ .Title }} - show page]({{ partial "markdown-url.html" . }}): description, hosts, and show notes
+- [Show JSON]({{ with .OutputFormats.Get "show" }}{{ .Permalink }}{{ end }}): status, hosts, links, feeds and latest episode
+- [Complete episode list]({{ .Permalink }}episodes.json): JSON list of every {{ .Title }} episode (episode, title, date, URL), newest first
+{{- with site.GetPage (printf "/show/%s/subscribe" .Params.show) }}
+- [Subscribe]({{ partial "markdown-url.html" . }}): {{ with .Params.rss }}RSS feed {{ . }} and {{ end }}podcast app links (JSON: {{ with .OutputFormats.Get "json" }}{{ .Permalink }}{{ end }})
+{{- end }}
+{{ with .Params.hosts }}
+## Hosts
+
+{{ range . }}{{ with site.GetPage (print "/hosts/" .) }}{{ $person := site.GetPage (print "/people/" .Data.Term) -}}
+- [{{ with $person }}{{ .Title }}{{ else }}{{ .Title }}{{ end }}]({{ partial "markdown-url.html" . }}): {{ len (where .Pages "Type" "episode") }} episodes hosted across the network{{ with $person }}{{ with .Params.bio }}. {{ . }}{{ end }}{{ end }} (JSON: {{ with .OutputFormats.Get "json" }}{{ .Permalink }}{{ end }})
+{{ end }}{{ end }}{{ end }}
+## Most recent episodes (of {{ len $eps }})
+
+{{ range first 10 $sorted -}}
+- [{{ .Date.Format "2006-01-02" }} · {{ .Title }}]({{ partial "markdown-url.html" . }}){{ with .Params.guests }} (guests: {{ range $i, $g := . }}{{ if $i }}, {{ end }}{{ partial "person-md-link.html" $g }}{{ end }}){{ end }} - {{ replaceRE `\s+` " " (trim .Description " \t\r\n") }}
+{{ end }}
+## Episode archive
+
+{{ $nums }} numbered episodes, {{ $lo }}-{{ $hi }}.{{ with (partial "show-episode-summary.html" .).numbered.missing }} Missing numbers: {{ delimit . ", " }}.{{ end }}{{ if $specials }} Plus {{ $specials }} special episodes with prefixed slugs (not plain numbers).{{ end }}
+
+Episode URL pattern: `{{ .Permalink }}<number>/` — replace the trailing `/` with `.md` for the markdown twin or `.json` for the JSON twin (hosts, guests, sponsors, chapters, audio/video, transcripts).
+Newest: `{{ .Permalink }}{{ with $sorted }}{{ (index . 0).Params.slug | default (index . 0).File.TranslationBaseName | lower }}.md{{ end }}` · Oldest: `{{ .Permalink }}{{ with $sorted }}{{ (index . (sub (len .) 1)).Params.slug | default (index . (sub (len .) 1)).File.TranslationBaseName | lower }}.md{{ end }}`

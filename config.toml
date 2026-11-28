@@ -1,11 +1,16 @@
 baseURL = 'https://www.jupiterbroadcasting.com/'
-languageCode = 'en-us'
+locale = 'en-us'
 title = 'Jupiter Broadcasting'
 # enableGitInfo = true
 
 theme = 'jb'
 
-paginate = 12
+[pagination]
+  pagerSize = 12
+
+[params.live]
+  audio_url = "https://n12.radiojar.com/0uk94cu0xrquv?rj-ttl=5&rj-tok=AAABlr_HIYcADeN2rSDaevNY4g"
+  video_url = "https://jupiter-hls.secdn.net/jupiter-channel/play/jupiter.smil/playlist.m3u8"
 
 # Footer logo and menu title config
 # footer menus are further down
@@ -28,7 +33,6 @@ paginate = 12
 
 [taxonomies]
   tag = "tags"
-  category = "categories"
   host = "hosts"
   guest = "guests"
 
@@ -46,53 +50,60 @@ paginate = 12
     weight =-90
 
     [[Menu.Main]]
-        name = "Coder Radio"
-        identifier = "coder-radio"
-        url = "/show/coder-radio/"
-        weight =91
-        parent = "shows"
-
-    [[Menu.Main]]
         name = "Jupiter EXTRAS"
         identifier = "jupiter-extras"
         url = "/show/jupiter-extras/"
-        weight =92
-        parent = "shows"
-
-    [[Menu.Main]]
-        name = "Linux Action News"
-        identifier = "linux-action-news"
-        url = "/show/linux-action-news/"
-        weight =93
+        weight =99
         parent = "shows"
 
     [[Menu.Main]]
         name = "LINUX Unplugged"
         identifier = "linux-unplugged"
         url = "/show/linux-unplugged/"
-        weight =94
-        parent = "shows"
-
-    [[Menu.Main]]
-        name = "Office Hours"
-        identifier = "office-hours"
-        url = "/show/office-hours/"
-        weight =95
-        parent = "shows"
-
-    [[Menu.Main]]
-        name = "Self-Hosted"
-        identifier = "self-hosted"
-        url = "/show/self-hosted/"
-        weight =96
+        weight =91
         parent = "shows"
 
     [[Menu.Main]]
         name = "This Week in Bitcoin"
         identifier = "this-week-in-bitcoin"
         url = "/show/this-week-in-bitcoin/"
-        weight =97
+        weight =93
         parent = "shows"
+
+    [[Menu.Main]]
+        name = "The Launch 🚀"
+        identifier = "the-launch"
+        url = "/show/the-launch/"
+        weight =94
+        parent = "shows"
+
+#    [[Menu.Main]]
+#        name = "Self-Hosted"
+#        identifier = "self-hosted"
+#        url = "/show/self-hosted/"
+#        weight =92
+#        parent = "shows"
+
+#    [[Menu.Main]]
+#        name = "Coder Radio"
+#        identifier = "coder-radio"
+#        url = "/show/coder-radio/"
+#        weight =91
+#        parent = "shows"
+
+#    [[Menu.Main]]
+#        name = "Linux Action News"
+#        identifier = "linux-action-news"
+#        url = "/show/linux-action-news/"
+#        weight =93
+#        parent = "shows"
+
+#    [[Menu.Main]]
+#        name = "Office Hours"
+#        identifier = "office-hours"
+#        url = "/show/office-hours/"
+#        weight =95
+#        parent = "shows"
 
 [[Menu.Main]]
     name = "Sponsors"
@@ -150,11 +161,11 @@ paginate = 12
         weight =82
         parent = "people"
 
-#[[Menu.Main]]
-    #name = "Archive"
-    #identifier = "archive"
-    #url = "/archive/"
-    #weight =90
+[[Menu.Main]]
+    name = "Archive"
+    identifier = "archive"
+    url = "/archive/"
+    weight =90
 
 [[Menu.Main]]
     name = "Community"
@@ -167,6 +178,12 @@ paginate = 12
     identifier = "contact"
     url = "/contact/"
     weight =110
+
+[[Menu.Main]]
+    name = "Search"
+    identifier = "search"
+    url = "/search/"
+    weight =120
 
 # Footer Menu (left)
 [[Menu.FooterLeft]]
@@ -233,13 +250,189 @@ paginate = 12
 
 # Output formats
 
+[mediaTypes]
+  # markdown twins of pages, for llms.txt consumers (see llmstxt.org spec v2)
+  [mediaTypes."text/markdown"]
+    suffixes = ["md"]
+  [mediaTypes."text/plain"]
+    suffixes = ["txt"]
+
 [outputFormats]
-  [outputFormats.webplayer]
-  mediatype ="application/json"
-  baseName = "webplayer"
+  # /show/<slug>/<NNNN>.json: episode metadata. `ugly` writes <NNNN>.json beside the page directory
+  # (enabled on episode pages and hosts/guests by the cascades below, and per page via `outputs`: /membership.json, /sponsors.json)
+  [outputFormats.json]
+    mediaType = "application/json"
+    isPlainText = true
+    ugly = true
+
+  # Sections and lists emitted as markdown: /community/ -> /community/index.md (list pages ignore `ugly`;
+  # pages, episodes and shows use pagemd/showmd below instead, named like their JSON)
+  [outputFormats.markdown]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "index"
+
+  # <slug>.md markdown beside the page directory, for every regular page (see [outputs]) and hosts/guests terms:
+  # /show/x/0650/ -> /show/x/0650.md, /membership/ -> /membership.md, /hosts/chris/ -> /hosts/chris.md
+  [outputFormats.pagemd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    ugly = true
+
+  # show markdown: /show/x/ -> /show/x/show.md (enabled per show via `outputs` in its _index.md)
+  [outputFormats.showmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "show"
+
+  # llmstxt.org spec files (see https://llmstxt.org). Rendered by Hugo from
+  # layouts/index.llms.txt / show/list.llms.txt -- enabled on home below, and
+  # on individual show sections via `outputs` in their _index.md front matter
+  # (so they do NOT render for /show/, /hosts/, /guests/, etc).
+  [outputFormats.llms]
+    mediaType = "text/plain"
+    isPlainText = true
+    baseName = "llms"
+
+  # /llms-full.txt: core (non-episode) pages concatenated
+  [outputFormats.llmsfull]
+    mediaType = "text/plain"
+    isPlainText = true
+    baseName = "llms-full"
+
+  # /show/<slug>/episodes.json: full episode enumeration per show
+  # (Hugo 0.105 predates per-section sitemaps, so this is the machine list)
+  [outputFormats.episodes]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "episodes"
+
+  # Section twins at the site root: /sponsors.json, /hosts.md, /community.json, ... List pages ignore `ugly`, so the
+  # home page renders these (layouts/index.<section>rootjson.json / index.<section>rootmd.md) and the section's head links them
+  [outputFormats.sponsorsrootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "sponsors"
+  [outputFormats.sponsorsrootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "sponsors"
+  [outputFormats.hostsrootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "hosts"
+  [outputFormats.hostsrootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "hosts"
+  [outputFormats.guestsrootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "guests"
+  [outputFormats.guestsrootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "guests"
+  [outputFormats.communityrootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "community"
+  [outputFormats.communityrootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "community"
+  [outputFormats.liverootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "live"
+  [outputFormats.liverootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "live"
+  [outputFormats.archiverootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "archive"
+  [outputFormats.archiverootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "archive"
+  [outputFormats.peoplerootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "people"
+  [outputFormats.peoplerootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "people"
+  [outputFormats.showrootjson]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "show"
+  [outputFormats.showrootmd]
+    mediaType = "text/markdown"
+    isPlainText = true
+    baseName = "show"
+
+  # /show/<slug>/show.json: show metadata (enabled per show via `outputs` in its _index.md)
+  [outputFormats.show]
+    mediaType = "application/json"
+    isPlainText = true
+    baseName = "show"
+
+  # /terminal.txt: ANSI home page for curl/wget, served at / by nginx on User-Agent (see Dockerfile)
+  [outputFormats.terminal]
+    mediaType = "text/plain"
+    isPlainText = true
+    baseName = "terminal"
+
+# Without this, `hugo --minify` rewrites 50108000 as 50108e3, which JSON parsers read as a float
+[minify.tdewolff.json]
+  keepNumbers = true
 
 [outputs]
-  page = ["html"]
-  # page = ["json","html","webplayer"]
+  home = ["html", "rss", "llms", "llmsfull", "sponsorsrootjson", "sponsorsrootmd", "hostsrootjson", "hostsrootmd", "guestsrootjson", "guestsrootmd", "communityrootjson", "communityrootmd", "liverootjson", "liverootmd", "archiverootjson", "archiverootmd", "peoplerootjson", "peoplerootmd", "showrootjson", "showrootmd", "terminal"]
+  page = ["html", "pagemd", "json"]
   # section = ["html","rss"]
-  section = ["html"]
+  section = ["html", "markdown"]
+  taxonomy = ["html", "markdown"]
+  term = ["html", "markdown"]
+
+[[cascade]]
+  outputs = ["html"]
+  [cascade.build]
+    list = "never"
+  [cascade.target]
+    path = "/search-index"
+    kind = "section"
+
+# index-only pages, deleted after indexing: no twins
+[[cascade]]
+  outputs = ["html"]
+  [cascade.target]
+    path = "/search-index/**"
+
+[[cascade]]
+  outputs = ["html", "pagemd", "json"]
+  [cascade.target]
+    path = "/show/**"
+    kind = "page"
+
+# sections with root twins (/community.json, /community.md, ...; see the output formats above): no index.md
+[[cascade]]
+  outputs = ["html"]
+  [cascade.target]
+    path = "{/hosts,/guests}"
+    kind = "taxonomy"
+[[cascade]]
+  outputs = ["html"]
+  [cascade.target]
+    path = "{/community,/live,/archive,/people,/show}"
+    kind = "section"
+
+# /hosts/<slug>.json, /guests/<slug>.json and .md
+[[cascade]]
+  outputs = ["html", "pagemd", "json"]
+  [cascade.target]
+    path = "{/hosts/**,/guests/**}"
+    kind = "term"

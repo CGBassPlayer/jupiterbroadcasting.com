@@ -3,6 +3,7 @@ title = "Boost "
 description = "Boost with a Podcasting 2.0 App"
 date = "2022-07-03T03:35:01-05:00"
 draft = false
+search_type = "support"
 +++
 
 Boosts are a new way to send value into the shows while including a personal message. We feature as many Boosts as we can on the shows as a thank you, and to add a bit of value to your Boost.
@@ -11,7 +12,7 @@ Boosts use the [Lightning Network](https://lightning.network/). Free software th
 
 ### Ways to Boost
 
-First you'll need some [sats](https://en.bitcoin.it/wiki/Satoshi_(unit)) and there are many ways get them. If you're in the US the simplest way we know of is to use the [Strike app](https://strike.me/) and outside the US [BlueWallet](https://bluewallet.io/). See below for a privacy focused method as well.
+First you'll need some [sats](https://en.bitcoin.it/wiki/Satoshi_(unit)) and there are many ways get them. If you're in the US the simplest way we know of is to use the [Strike app](https://strike.me/) and outside the US [BlueWallet](https://bluewallet.io/). Other options include the [Bitcoin Well](https://bitcoinwell.com/jupiter) or [River](https://www.jupiterbroadcasting.com/River). See below for a privacy focused method as well. 
 
 Once you have acquired your sats, you send them to a Podcasting 2.0 compatible app.
 

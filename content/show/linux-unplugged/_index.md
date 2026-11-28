@@ -1,9 +1,9 @@
 +++
+outputs = ["html", "showmd", "llms", "episodes", "show"]
 title = "LINUX Unplugged"
 description = "An open show powered by community LINUX Unplugged takes the best attributes of open collaboration and turns it into a weekly show about Linux."
 date = "2022-05-10T04:10:01-05:00"
 draft = false
-categories = ["LINUX Unplugged"]
 show = "linux-unplugged"
 hosts = ["chris","brent","wes"]
 
@@ -14,6 +14,8 @@ header_image = "/images/shows/linux-unplugged.png"
 
 podverse_podcast_id = "g40Um-HP1"
 
+[links.support]
+  url = "/membership"
 [links.twitter]
   url = "https://twitter.com/LINUXUnplugged"
 [links.email]
@@ -30,6 +32,8 @@ podverse_podcast_id = "g40Um-HP1"
   url="https://linuxunplugged.com/articles"
 [links.youtube]
   url="https://www.youtube.com/playlist?list=PLUW3LUwQvegxVckkyK5dyyARdfjwGY-cw"
+[links.smart-link]
+  url="https://episodes.fm/687598126"
 
 +++
 

@@ -1,0 +1,1 @@
+{{ partial "md/list.md" . }}

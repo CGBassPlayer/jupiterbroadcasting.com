@@ -1,0 +1,12 @@
+{{- $eps := where .Pages "Type" "episode" -}}
+{
+  "schema_version": 1,
+  "type": "episodes",
+  "slug": {{ .Params.show | jsonify }},
+  "title": {{ .Title | jsonify }},
+  "count": {{ len $eps }},
+  "episodes": [
+{{ range $i, $p := $eps.ByDate.Reverse }}{{ if $i }},
+{{ end }}    {{ $ref := partial "json-episode-ref.html" $p }}{{ with $p.OutputFormats.Get "json" }}{{ $ref = merge $ref (dict "json_url" .Permalink) }}{{ end }}{{ $ref | jsonify (dict "noHTMLEscape" true) }}{{ end }}
+  ]
+}

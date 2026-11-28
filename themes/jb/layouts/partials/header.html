@@ -1,5 +1,5 @@
 <header>
-  <nav class="navbar is-fixed-top {{ if eq .Params.hashero false  }}gradient-home{{end}}" id="mainnavigation" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-fixed-top {{ if eq .Params.hashero false  }}gradient-home{{end}}" id="mainnavigation" data-live-url="{{ site.Params.live.video_url }}" role="navigation" aria-label="main navigation">
       <div class="container">
           <div class="navbar-brand">
             {{ range (where .Site.Menus.main "Identifier" "home")}}
@@ -10,6 +10,7 @@
             {{ end }}
               <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
                  data-target="navbarBasicExample">
+                  <span aria-hidden="true"></span>
                   <span aria-hidden="true"></span>
                   <span aria-hidden="true"></span>
                   <span aria-hidden="true"></span>
@@ -51,7 +52,9 @@
                                             <a class="dropdown-item" href="{{ site.Params.feed.video_rss }}" class="navbar-item {{ if $active }}active{{ end }}">All Shows Feed - Video</a>
                                             <a class="dropdown-item" href="{{ site.Params.feed.jupiter_station }}" class="navbar-item {{ if $active }}active{{ end }}">Jupiter Station</a>
                                             {{ range .Children }}
-                                                <a class="dropdown-item" href="{{ (site.GetPage (string .URL)).Params.links.shownotes.url }}/rss" class="navbar-item {{ if $active }}active{{ end }}">{{ .Name }}</a>
+                                                {{ with $.GetPage ("/subscribe.md" | printf "%s" | printf "%s%s" (site.GetPage (string .URL)).Params.show | printf "%s%s" "/show/") }}
+                                                    <a class="dropdown-item" href="{{ .Params.rss }}" class="navbar-item {{ if $active }}active{{ end }}">{{ .Parent.Title }}</a>
+                                                {{ end }}
                                             {{ end }}
                                         </div>
                                     </div>
