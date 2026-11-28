@@ -3,9 +3,7 @@
   {{ if hugo.IsProduction }}
     {{ $contact = $contact | minify | fingerprint }}
   {{ end }}
-  <script type="text/javascript" src="{{ $contact.Permalink }}" integrity="{{ $contact.Data.Integrity }}"></script>
-  <!-- Script to submit form to Wufoo -->
-  <script type="text/javascript" src = "https://static.wufoo.com/scripts/public/dynamic.0690.js?language=english"></script> 
+  <script type="text/javascript" src="{{ $contact.Permalink }}" integrity="{{ $contact.Data.Integrity }}" defer></script>
 {{end}}
 
 {{ define "main" }}
@@ -37,14 +35,16 @@
         <div class="columns">
           <div class="column is-8 is-offset-2">
             <label class="label" for="Field7">Show:</label>
-            <select class="select" type="text" id="Field7">
-              <option value="General Comments" selected>General Comments</option>
-              <option value="Coder Radio">Coder Radio</option>
-              <option value="Linux Unplugged">Linux Unplugged</option>
-              <option value="Linux Action News">Linux Action News</option>
-              <option value="Self Hosted">Self Hosted</option>
-              <option value="Office Hours">Office Hours</option>
-            </select>
+            <div class="select">
+              <select id="Field7">
+                <option value="General Comments" selected>General Comments</option>
+                <option value="Coder Radio">Coder Radio</option>
+                <option value="Linux Unplugged">Linux Unplugged</option>
+                <option value="Linux Action News">Linux Action News</option>
+                <option value="Self Hosted">Self Hosted</option>
+                <option value="Office Hours">Office Hours</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -78,10 +78,16 @@
 
         <div class="columns">
           <div class="column is-8 is-offset-2">
-            <input class="radio" type="radio" id="feedback-public" name="Field9" value="I grant permission to read or post this feedback on-air and/or on the website.">
-            <label for="feedback-public">My feedback can be used on the show</label><br>
-            <input class="radio" type="radio" id="feedback-private" name="Field9" value="This feedback is private." checked>
-            <label for="feedback-private">My feedback is private</label><br>  
+            <div class="radios">
+              <label class="radio">
+                <input type="radio" name="Field9" value="I grant permission to read or post this feedback on-air and/or on the website.">
+                My feedback can be used on the show
+              </label>
+              <label class="radio">
+                <input type="radio" name="Field9" value="This feedback is private." checked>
+                My feedback is private
+              </label>
+            </div>
           </div>
         </div>
         
